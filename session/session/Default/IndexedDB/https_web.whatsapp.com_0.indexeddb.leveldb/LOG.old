@@ -1,4 +1,0 @@
-2025/02/16-15:16:00.333 5500 Reusing MANIFEST C:\Users\rafae\OneDrive\Desktop\bot-whatsapp\bot\session\session\Default\IndexedDB\https_web.whatsapp.com_0.indexeddb.leveldb/MANIFEST-000001
-2025/02/16-15:16:00.333 5500 Recovering log #89
-2025/02/16-15:16:00.383 5500 Reusing old log C:\Users\rafae\OneDrive\Desktop\bot-whatsapp\bot\session\session\Default\IndexedDB\https_web.whatsapp.com_0.indexeddb.leveldb/000089.log 
-2025/02/16-15:16:02.050 5e5c Manual compaction at level-0 from '\x00(\x00\x00\x00' @ 72057594037927935 : 1 .. '\x00)\x00\x00\x00' @ 0 : 0; will stop at (end)
