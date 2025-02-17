@@ -2,9 +2,12 @@ const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 const crypto = require("crypto");
 
-async function gasto(partes, chatId, client){
+async function gasto(partes, chatId, client, categoria){
   // !gasto valor descrição
   
+  client.sendMessage(chatId,)
+
+
   if(partes.length < 3){
     client.sendMessage(
       chatId,
@@ -21,12 +24,14 @@ async function gasto(partes, chatId, client){
     client.sendMessage(chatId, "❌ O valor precisa ser um número!");
     return;
   }
+
   try{
     const newGasto = await prisma.gasto.create({
       data:{
         valor:valor,
         descricao:descricao,
-        user_id: hashId
+        user_id: hashId,
+        categoria: categoria,
       }
     });
     client.sendMessage(chatId,`✅ Gasto de R$${valor.toFixed(2)} adicionado!📝 ${descricao} com o id ${newGasto.gasto_id}`);
@@ -90,4 +95,34 @@ async function editar(partes,chatId, client){
   }
 }
 
-module.exports = { gasto, total, editar};
+async function deletar(partes, chatId, client) {
+  const hashId = crypto.createHash("sha256").update(chatId).digest("hex");
+  if (partes.length < 2) {
+    client.sendMessage(chatId, "❌ Formato inválido! Use: !deletar idGasto");
+    return;
+  }
+
+  const idGasto = parseInt(partes[1]);
+
+  if (isNaN(idGasto)) {
+    client.sendMessage(chatId, "❌ O ID do gasto deve ser um número!");
+    return;
+  }
+
+  try {
+    await prisma.gasto.delete({
+      where: {
+        gasto_id: idGasto,
+        user_id: hashId,
+      },
+    });
+
+    client.sendMessage(chatId, "✅ Gasto deletado com sucesso!");
+    return;
+  } catch (error) {
+    client.sendMessage(chatId, "❌ Erro ao deletar o valor!");
+    return;
+  }
+}
+
+module.exports = { gasto, total, editar, deletar};

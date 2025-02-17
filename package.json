@@ -1,6 +1,8 @@
 {
   "dependencies": {
     "@prisma/client": "^6.3.1",
+    "arquero": "^8.0.0",
+    "chart.js": "^4.4.7",
     "crypto": "^1.0.1",
     "prisma": "^6.3.1",
     "qrcode-terminal": "^0.12.0",

@@ -4,7 +4,7 @@ const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 const crypto = require('crypto');
 
-const { gasto, total, editar} = require("./functions.js");
+const { gasto, total, editar, deletar } = require("./functions.js");
 
 
 const client = new Client({
@@ -32,6 +32,7 @@ client.on("ready",() =>{
 // Recebe uma mensagem e escreve no console
 
 client.on('message', async  (message) => {
+
   const chatId = message.from;
   const msg = message.body.trim()
   const partes = msg.split(" ");
@@ -59,25 +60,82 @@ client.on('message', async  (message) => {
 
   switch(comando){
     case "!gasto":
-      // Chama a função gasto de functions.js
-      gasto(partes, chatId, client);
+      let aguardandoResposta = false; 
+      const message = `Escolha uma categoria para o gasto:\n
+      1 - 🏥 Saúde\n
+      2 - 🍔 Alimentação\n
+      3 - 🚗 Transporte\n
+      4 - 🎮 Lazer\n
+      5 - 📦 Outro
+      Responda com o número correspondente à categoria desejada.`;
+      client.sendMessage(chatId, message);
+      aguardandoResposta = true;
+
+      client.on('message', async (msg) => {
+        if (msg.from === chatId && aguardandoResposta) {
+          const resposta = msg.body.trim();
+          let categoria;
+          switch (resposta) {
+            case '1':
+              categoria = 'Saúde';
+              break;
+            case '2':
+              categoria = 'Alimentação';
+              break;
+            case '3':
+              categoria = 'Transporte';
+              break;
+            case '4':
+              categoria = 'Lazer';
+              break;
+            case '5':
+              categoria = 'Outro';
+              break;
+            default:
+              client.sendMessage(chatId, '❌ Opção inválida. Por favor, responda com um número de 1 a 5.');
+              return; 
+          }
+          aguardandoResposta = false;
+          gasto(partes, chatId, client, categoria);
+        }
+      });
+      
       break;
     case "!total":
       total(chatId,client);
       break;
     case "!editar":
-      editar(partes,chatId,client)
+      editar(partes, chatId, client)
       break;
-    case "!comandos":
+    case "!deletar":
+      deletar(partes,chatId,client);
+      break;
+    case "ola":
+    case "olá":
       client.sendMessage(chatId,"🤖 Bem vindo ao chatbot financeiro! Comandos disponíveis:\n" +
         "✅ *!gasto valor descrição* - Registra um novo gasto.\n" +
         "📊 *!total* - Exibe o total de gastos do mês.\n" +
-        "♻️ *!editar idGasto valor* - Altera um gasto \n\n" + 
+        "♻️ *!editar idGasto valor* - Altera um gasto \n" + 
+        "🗑️ *!deletar idGasto* - Remove um gasto.\n\n" +    
         "❓ Envie um desses comandos para interagir com o bot!");
+        break;
+    case "!comandos":
+      client.sendMessage(chatId,"🤖 Comandos disponíveis:\n" +         
+        "✅ *!gasto valor descrição* - Registra um novo gasto.\n" +         
+        "📊 *!total* - Exibe o total de gastos do mês.\n" +         
+        "♻️ *!editar idGasto valor* - Altera um gasto.\n" +  
+        "🗑️ *!deletar idGasto* - Remove um gasto.\n\n" +        
+        "❓ Envie um desses comandos para interagir com o bot!"
+    );
+      break;
+    case "!":
+      client.sendMessage(
+        chatId,
+        "⚠️ Ops! Parece que esse comando não existe ou foi digitado incorretamente.\n\n" +
+        "💡 Para ver a lista completa de comandos disponíveis, digite: *!comandos*"
+      );
       break;
     default:
-      //client.sendMessage(chatId,"🤖 Bem vindo ao chatbot financeiro!\n"+
-        //"🤖 Digite !comandos para ver os comandos!");
       break;
   }
 });
