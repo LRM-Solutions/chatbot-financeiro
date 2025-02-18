@@ -3,7 +3,7 @@ const qrcode = require("qrcode-terminal");
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 const crypto = require('crypto');
-
+const encontrarCategoria = require("./categorias.js");
 const { gasto, total, editar, deletar } = require("./functions.js");
 
 
@@ -28,8 +28,6 @@ client.on("qr",(qr)=>{
 client.on("ready",() =>{
   console.log(" ✅ Bot está pronto! ");
 });
-
-// Recebe uma mensagem e escreve no console
 
 client.on('message', async  (message) => {
 
@@ -59,48 +57,6 @@ client.on('message', async  (message) => {
   }
 
   switch(comando){
-    case "!gasto":
-      let aguardandoResposta = false; 
-      const message = `Escolha uma categoria para o gasto:\n
-      1 - 🏥 Saúde\n
-      2 - 🍔 Alimentação\n
-      3 - 🚗 Transporte\n
-      4 - 🎮 Lazer\n
-      5 - 📦 Outro
-      Responda com o número correspondente à categoria desejada.`;
-      client.sendMessage(chatId, message);
-      aguardandoResposta = true;
-
-      client.on('message', async (msg) => {
-        if (msg.from === chatId && aguardandoResposta) {
-          const resposta = msg.body.trim();
-          let categoria;
-          switch (resposta) {
-            case '1':
-              categoria = 'Saúde';
-              break;
-            case '2':
-              categoria = 'Alimentação';
-              break;
-            case '3':
-              categoria = 'Transporte';
-              break;
-            case '4':
-              categoria = 'Lazer';
-              break;
-            case '5':
-              categoria = 'Outro';
-              break;
-            default:
-              client.sendMessage(chatId, '❌ Opção inválida. Por favor, responda com um número de 1 a 5.');
-              return; 
-          }
-          aguardandoResposta = false;
-          gasto(partes, chatId, client, categoria);
-        }
-      });
-      
-      break;
     case "!total":
       total(chatId,client);
       break;
@@ -110,24 +66,25 @@ client.on('message', async  (message) => {
     case "!deletar":
       deletar(partes,chatId,client);
       break;
-    case "ola":
     case "olá":
+    case "ola":
+    case "Ola":
+    case "Olá":
       client.sendMessage(chatId,"🤖 Bem vindo ao chatbot financeiro! Comandos disponíveis:\n" +
-        "✅ *!gasto valor descrição* - Registra um novo gasto.\n" +
+        "✅ *<Descrição> <Valor> (ex: Cinema 50)* - Registra um novo gasto.\n" +
         "📊 *!total* - Exibe o total de gastos do mês.\n" +
         "♻️ *!editar idGasto valor* - Altera um gasto \n" + 
         "🗑️ *!deletar idGasto* - Remove um gasto.\n\n" +    
         "❓ Envie um desses comandos para interagir com o bot!");
         break;
     case "!comandos":
-      client.sendMessage(chatId,"🤖 Comandos disponíveis:\n" +         
-        "✅ *!gasto valor descrição* - Registra um novo gasto.\n" +         
-        "📊 *!total* - Exibe o total de gastos do mês.\n" +         
-        "♻️ *!editar idGasto valor* - Altera um gasto.\n" +  
-        "🗑️ *!deletar idGasto* - Remove um gasto.\n\n" +        
-        "❓ Envie um desses comandos para interagir com o bot!"
-    );
-      break;
+      client.sendMessage(chatId,"🤖 Bem vindo ao chatbot financeiro! Comandos disponíveis:\n" +
+        "✅ *<Descrição> <Valor> (ex: Cinema 50)* - Registra um novo gasto.\n" +
+        "📊 *!total* - Exibe o total de gastos do mês.\n" +
+        "♻️ *!editar idGasto valor* - Altera um gasto \n" + 
+        "🗑️ *!deletar idGasto* - Remove um gasto.\n\n" +    
+        "❓ Envie um desses comandos para interagir com o bot!");
+        break;
     case "!":
       client.sendMessage(
         chatId,
@@ -136,6 +93,28 @@ client.on('message', async  (message) => {
       );
       break;
     default:
+      // Deepseek que fez 100% que dá pra fazer melhor
+      const regexGasto = /(.+?)\s+(\d+[\.,]?\d*)$/;
+      const match = msg.match(regexGasto);
+
+      if (match) {
+        const descricao = match[1].trim();
+        const valor = parseFloat(match[2].replace(',', '.'));
+        
+        if (isNaN(valor)) {
+          client.sendMessage(chatId, "❌ Valor inválido! Use: *Descrição Valor* (ex: Uber 25.50)");
+          return;
+        }
+
+        const categoria = encontrarCategoria(descricao);
+        if (categoria) {
+          gasto(partes, chatId, client, categoria, valor);
+        } else {
+          client.sendMessage(chatId, `❌ Categoria não identificada para *${descricao}*. Dica: Use termos como "Restaurante", "Transporte", etc.`);
+        }
+      } else {
+        client.sendMessage(chatId, `🤖 Não entendi! Para registrar um gasto, use:\n*<Descrição> <Valor>* (ex: Cinema 50)\n\nDigite *!comandos* para ver todas as opções.`);
+      }
       break;
   }
 });

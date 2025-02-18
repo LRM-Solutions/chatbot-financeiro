@@ -2,24 +2,12 @@ const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 const crypto = require("crypto");
 
-async function gasto(partes, chatId, client, categoria){
-  // !gasto valor descrição
-  
-  client.sendMessage(chatId,)
 
 
-  if(partes.length < 3){
-    client.sendMessage(
-      chatId,
-      "❌ Formato inválido! Use: *!gasto valor descrição*"
-    );
-    return;
-  }
-
-  const valor = parseFloat(partes[1]);
+async function gasto(partes, chatId, client, categoria,valor){
   const descricao = partes.slice(2).join(" ");
   const hashId = crypto.createHash("sha256").update(chatId).digest("hex");
-
+  
   if(isNaN(valor)){
     client.sendMessage(chatId, "❌ O valor precisa ser um número!");
     return;
