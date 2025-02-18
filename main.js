@@ -109,8 +109,6 @@ client.on('message', async  (message) => {
         const categoria = encontrarCategoria(descricao);
         if (categoria) {
           gasto(partes, chatId, client, categoria, valor);
-        } else {
-          client.sendMessage(chatId, `❌ Categoria não identificada para *${descricao}*. Dica: Use termos como "Restaurante", "Transporte", etc.`);
         }
       } else {
         client.sendMessage(chatId, `🤖 Não entendi! Para registrar um gasto, use:\n*<Descrição> <Valor>* (ex: Cinema 50)\n\nDigite *!comandos* para ver todas as opções.`);

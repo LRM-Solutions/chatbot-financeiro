@@ -20,13 +20,12 @@ model User{
 }
 
 model Gasto{
-  gasto_id Int @id @default(autoincrement())
+  gasto_id Int 
   valor Float 
   categoria String 
   descricao String
   data DateTime @default(now())
   user_id String // Chave estrangeira
   user User @relation(fields: [user_id], references: [user_id])  
+  @@id([user_id, gasto_id])
 }
-
-// Mudar a Chave Composta Gasto_id !

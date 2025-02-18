@@ -5,7 +5,7 @@ const crypto = require("crypto");
 
 
 async function gasto(partes, chatId, client, categoria,valor){
-  const descricao = partes.slice(2).join(" ");
+  const descricao = partes.filter(palavra => isNaN(palavra)).join(" ");
   const hashId = crypto.createHash("sha256").update(chatId).digest("hex");
   
   if(isNaN(valor)){
@@ -14,17 +14,31 @@ async function gasto(partes, chatId, client, categoria,valor){
   }
 
   try{
+  
+    const lastGasto = await prisma.gasto.aggregate({
+      where: { user_id: hashId },
+      _max: {
+        gasto_id: true
+      }
+    });
+
+    const nextId = (lastGasto._max.gasto_id || 0) + 1;
+    
     const newGasto = await prisma.gasto.create({
       data:{
         valor:valor,
         descricao:descricao,
         user_id: hashId,
-        categoria: categoria,
+        categoria: categoria, 
+        gasto_id: nextId
       }
     });
+
     client.sendMessage(chatId,`✅ Gasto de R$${valor.toFixed(2)} adicionado!📝 ${descricao} com o id ${newGasto.gasto_id}`);
     return;
+  
   }catch(error){
+    console.log(error);
     client.sendMessage(chatId, "❌ Erro ao salvar o gasto!")
     return;
   }
