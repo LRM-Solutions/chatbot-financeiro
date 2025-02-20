@@ -4,6 +4,7 @@ const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 const crypto = require('crypto');
 const encontrarCategoria = require("./categorias.js");
+const encontrarCategoriaId = require("./categoriaId.js");
 const { gasto, total, editar, deletar } = require("./functions.js");
 
 
@@ -30,34 +31,39 @@ client.on("ready",() =>{
 });
 
 client.on('message', async  (message) => {
-
   const chatId = message.from;
+  const hashId = crypto.createHash("sha256").update(chatId).digest("hex");
   const msg = message.body.trim()
   const partes = msg.split(" ");
   const comando = partes[0].toLowerCase();
 
-  const hashId = crypto.createHash("sha256").update(chatId).digest("hex");
+  try{
+    await prisma.$transaction(async(prisma)=>{
+      const userExists = await prisma.user.findUnique({
+        where: {
+            user_id: hashId,
+        },
+      });
 
-  const userExists = await prisma.user.findUnique({
-    where:{
-      user_id:hashId,
-    },
-  });
-
-  if(!userExists){
-    const contato = await client.getContactById(chatId);
-    const nome = contato.pushname || contato.name || 'Nome Não disponível';
-
-    newUser = await prisma.user.create({
-      data:{
-        user_id: hashId,
-        name: nome
-      }
-    });
-  }
+      if(!userExists){
+        const contato = await client.getContactById(chatId);
+        const nome = contato.pushname || contato.name || 'Nome Não disponível';
+  
+        newUser = await prisma.user.create({
+          data:{
+            user_id: hashId,
+            name: nome
+            }
+          })
+        }
+      }); 
+    }catch(error){
+      console.log(error);
+    }
 
   switch(comando){
     case "!total":
+      // !total 05 / 2006
       total(chatId,client);
       break;
     case "!editar":
@@ -73,15 +79,15 @@ client.on('message', async  (message) => {
       client.sendMessage(chatId,"🤖 Bem vindo ao chatbot financeiro! Comandos disponíveis:\n" +
         "✅ *<Descrição> <Valor> (ex: Cinema 50)* - Registra um novo gasto.\n" +
         "📊 *!total* - Exibe o total de gastos do mês.\n" +
-        "♻️ *!editar idGasto valor* - Altera um gasto \n" + 
+        "♻️ *!editar idGasto valor* - Altera o valor de um gasto \n" + 
         "🗑️ *!deletar idGasto* - Remove um gasto.\n\n" +    
         "❓ Envie um desses comandos para interagir com o bot!");
         break;
     case "!comandos":
-      client.sendMessage(chatId,"🤖 Bem vindo ao chatbot financeiro! Comandos disponíveis:\n" +
+      client.sendMessage(chatId,"Comandos disponíveis:\n" +
         "✅ *<Descrição> <Valor> (ex: Cinema 50)* - Registra um novo gasto.\n" +
         "📊 *!total* - Exibe o total de gastos do mês.\n" +
-        "♻️ *!editar idGasto valor* - Altera um gasto \n" + 
+        "♻️ *!editar idGasto valor* - Altera o valor de um gasto \n" + 
         "🗑️ *!deletar idGasto* - Remove um gasto.\n\n" +    
         "❓ Envie um desses comandos para interagir com o bot!");
         break;
@@ -93,7 +99,6 @@ client.on('message', async  (message) => {
       );
       break;
     default:
-      // Deepseek que fez 100% que dá pra fazer melhor
       const regexGasto = /(.+?)\s+(\d+[\.,]?\d*)$/;
       const match = msg.match(regexGasto);
 
@@ -108,7 +113,9 @@ client.on('message', async  (message) => {
 
         const categoria = encontrarCategoria(descricao);
         if (categoria) {
-          gasto(partes, chatId, client, categoria, valor);
+          const categoria_id = encontrarCategoriaId(categoria);
+          console.log(categoria_id);
+          gasto(partes, chatId, client, categoria, valor, categoria_id);
         }
       } else {
         client.sendMessage(chatId, `🤖 Não entendi! Para registrar um gasto, use:\n*<Descrição> <Valor>* (ex: Cinema 50)\n\nDigite *!comandos* para ver todas as opções.`);

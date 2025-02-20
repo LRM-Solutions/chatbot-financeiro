@@ -2,9 +2,7 @@ const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 const crypto = require("crypto");
 
-
-
-async function gasto(partes, chatId, client, categoria,valor){
+async function gasto(partes, chatId, client, categoria, valor, categoria_id){
   const descricao = partes.filter(palavra => isNaN(palavra)).join(" ");
   const hashId = crypto.createHash("sha256").update(chatId).digest("hex");
   
@@ -14,38 +12,48 @@ async function gasto(partes, chatId, client, categoria,valor){
   }
 
   try{
-  
-    const lastGasto = await prisma.gasto.aggregate({
-      where: { user_id: hashId },
-      _max: {
-        gasto_id: true
-      }
-    });
+    await prisma.$transaction(async(prisma)=>{
+      const lastGasto = await prisma.gasto.aggregate({
+        where: { user_id: hashId },
+        _max: {
+          gasto_id: true
+        }
+      });
 
-    const nextId = (lastGasto._max.gasto_id || 0) + 1;
-    
-    const newGasto = await prisma.gasto.create({
-      data:{
-        valor:valor,
-        descricao:descricao,
-        user_id: hashId,
-        categoria: categoria, 
-        gasto_id: nextId
-      }
-    });
+      const nextId = (lastGasto._max.gasto_id || 0) + 1;
 
-    client.sendMessage(chatId,`✅ Gasto de R$${valor.toFixed(2)} adicionado!📝 ${descricao} com o id ${newGasto.gasto_id}`);
+      const newGasto = await prisma.gasto.create({
+        data:{
+          valor:valor,
+          descricao:descricao,
+          user_id: hashId,
+          categoria: categoria,
+          categoria_id: categoria_id,
+          gasto_id: nextId
+        }
+      });
+
+      client.sendMessage(
+        chatId,
+        `📌 *Gasto adicionado com sucesso!* \n\n` +
+        `💵 *Valor:* R$${valor.toFixed(2)}\n` +
+        `📂 *Categoria:* ${categoria}\n` +
+        `📝 *Descrição:* ${descricao}\n` +
+        `🆔 *ID do Gasto:* ${newGasto.gasto_id}\n\n` +
+        `✅ Tudo certo! Seu gasto foi registrado.`
+      );
+    })
     return;
   
   }catch(error){
-    console.log(error);
-    client.sendMessage(chatId, "❌ Erro ao salvar o gasto!")
+    client.sendMessage(chatId, "⚠️ Ops, tente novamente em alguns segundos!");
     return;
   }
 }
 
 async function total(chatId,client){
   const hashId = crypto.createHash("sha256").update(chatId).digest("hex");
+  
   try{
     const gastos = await prisma.gasto.findMany({
       where:{
@@ -65,8 +73,8 @@ async function total(chatId,client){
 
 async function editar(partes,chatId, client){
   const hashId = crypto.createHash("sha256").update(chatId).digest("hex");
-  if (partes.length < 4) {
-    client.sendMessage(chatId, "❌ Formato inválido! Use: ♻️ !update idGasto valor descrição");
+  if (partes.length < 3) {
+    client.sendMessage(chatId, "❌ Formato inválido! Use: ♻️ !update idGasto valor");
     return;
   }
 
@@ -79,14 +87,16 @@ async function editar(partes,chatId, client){
   }
 
   try{
-    const atualizaGasto = await prisma.gasto.update({
+    await prisma.gasto.update({
       where:{
-        gasto_id:idGasto,
-        user_id: hashId
+        user_id_gasto_id:{
+          user_id: hashId,
+          gasto_id: idGasto,
+        },
       },
       data:{
         valor:valor
-      }
+      },
     });
     
     client.sendMessage(chatId, `✅ Gasto atualizado com sucesso! Novo valor: R$${valor.toFixed(2)}`);
@@ -114,11 +124,14 @@ async function deletar(partes, chatId, client) {
   try {
     await prisma.gasto.delete({
       where: {
-        gasto_id: idGasto,
-        user_id: hashId,
+        user_id_gasto_id: {
+          user_id: hashId,
+          gasto_id: idGasto,
+        },
       },
     });
 
+    
     client.sendMessage(chatId, "✅ Gasto deletado com sucesso!");
     return;
   } catch (error) {

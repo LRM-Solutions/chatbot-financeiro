@@ -1,16 +1,9 @@
 const stringSimilarity = require("string-similarity");
 
-const categorias = {
-  "alimentação": [
-  "comida", "coca","lanche", "almoço", "janta", "refeição", "pizza", "hamburguer", "sushi", "restaurante", "café", "sobremesa", "padaria", "fast food", "churrasco", "açai", "sorvete", "bebida", "refrigerante", "suco", "cerveja", "vinho", "whisky", "vodka", "água", "sanduíche", "hot dog", "pastel", "coxinha", "empada", "torta", "bolo", "chocolate", "balas", "doces", "pipoca", "batata frita", "esfiha", "pão", "queijo", "presunto", "manteiga", "leite", "iogurte", "cereal", "fruta", "salada", "arroz", "feijão", "macarrão", "carne", "frango", "peixe", "ovo", "pão de queijo", "tapioca", "crepe", "waffle", "panqueca", "brigadeiro", "beijinho", "pudim", "mousse", "milkshake", "sorveteria", "lanchonete", "food truck", "delivery", "ifood", "rappi", "uber eats"],
-  "transporte": ["uber", "ônibus", "gasolina", "combustível", "passagem", "táxi", "metrô", "avião", "bilhete", "viagem", "carro", "moto", "pedágio", "estacionamento", "aluguel de carro", "transporte público"],
-  "lazer": ["cinema", "show", "balada", "jogo", "cassino","entretenimento", "festival", "parque", "teatro", "museu", "zoológico", "aquário", "festa", "boate", "karaokê", "viagem", "passeio", "academia", "esporte", "futebol", "natação"],
-  "saúde": ["remédio", "consulta", "médico", "hospital", "farmácia", "exame", "cirurgia", "dentista", "óculos", "plano de saúde", "vacina", "psicólogo", "fisioterapia", "acupuntura", "massagem"],
-  "compras": ["pod","maconha","droga","pó","camiseta", "calça", "sapato", "tênis", "roupa", "vestido", "loja", "supermercado", "e-commerce", "mercado", "shopping", "eletrônico", "celular", "notebook", "livro", "presente", "decoração", "móveis", "cosméticos", "perfume"],
-  "outros": []
-};
+const fs = require('fs');
 
-
+const rawData = fs.readFileSync('categorias.json', 'utf8'); // Lê o arquivo como string
+const categorias = JSON.parse(rawData);
 
 const categoriasMapeadas = new Map();
 for (const [categoria, palavras] of Object.entries(categorias)) {
@@ -40,11 +33,17 @@ function encontrarCategoria(descricao) {
 
   const todasAsPalavras = Array.from(categoriasMapeadas.keys());
   const melhorCorrespondencia = stringSimilarity.findBestMatch(descricaoNormalizada, todasAsPalavras).bestMatch;
-  if (melhorCorrespondencia.rating > 0.7) {
+  if (melhorCorrespondencia.rating > 0.70){
     return categoriasMapeadas.get(melhorCorrespondencia.target);
   }
-  categorias["outros"].push(descricaoNormalizada);
-  return "outros";
+  
+  if (!categorias["Outros"].includes(descricaoNormalizada)) {
+    categorias["Outros"].push(descricaoNormalizada);
+    
+    fs.writeFileSync("categorias.json", JSON.stringify(categorias, null, 2), "utf8");
+  
+  }
+  return "Outros";
 }
 
 module.exports = encontrarCategoria;
