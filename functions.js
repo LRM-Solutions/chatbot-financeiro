@@ -4,9 +4,11 @@ const crypto = require("crypto");
 const { mesParaNumeros } = require("./Ids.js");
 
 async function gasto(partes, chatId, client, categoria, valor, categoria_id){
-  const descricao = partes.filter(palavra => isNaN(palavra)).join(" ");
+  const descricao = partes.slice(0, -1).join(" ");
   const hashId = crypto.createHash("sha256").update(chatId).digest("hex");
   
+  console.log("descrição:",descricao);
+
   if(isNaN(valor)){
     client.sendMessage(chatId, "❌ O valor precisa ser um número!");
     return;
@@ -47,6 +49,7 @@ async function gasto(partes, chatId, client, categoria, valor, categoria_id){
     return;
   
   }catch(error){
+    console.log(error);
     client.sendMessage(chatId, "⚠️ Ops, tente novamente em alguns segundos!");
     return;
   }
@@ -55,34 +58,46 @@ async function gasto(partes, chatId, client, categoria, valor, categoria_id){
 async function total(chatId,client, partes){
   const hashId = crypto.createHash("sha256").update(chatId).digest("hex");
 
-  const mes = mesParaNumeros(partes);
-  if(mes == null){
-    client.sendMessage(chatId, "❌ ERRO! Digite por exemplo: !total janeiro");
-    return;
-  }
-  
-  const ano = new Date().getFullYear(); 
-  const DataInicio = new Date(Date.UTC(ano, mes - 1, 1)); // UTC 00:00 do primeiro dia do mês
-  const DataFim = new Date(Date.UTC(ano, mes, 0)); // UTC 23:59 do último dia do mês
-
-  try{
-    const gastos = await prisma.gasto.findMany({
-      where:{
-        user_id: hashId,
-        data:{
-          gte: DataInicio,
-          lt: DataFim 
+  if(partes == null){
+    try{
+      const gastos = await prisma.gasto.findMany({
+        where:{
+          user_id: hashId
         }
-      }
-    });
-
-    const totalGastos = gastos.reduce((total, gasto) => total + gasto.valor, 0);
+      });
+      
+      const totalGastos = gastos.reduce((total, gasto) => total + gasto.valor, 0);
+      client.sendMessage(chatId, `💰 Seu total de gastos é: R$${totalGastos.toFixed(2)}`);
+      return;
+    }catch(error){
+      console.log(error);
+      client.sendMessage(chatId, "Erro!");
+      return;
+    }
+  }else{
+    const mes = mesParaNumeros(partes);
+    console.log("mes:",mes);
+    const ano = new Date().getFullYear();
+    const DataInicio = new Date(Date.UTC(ano,mes -1, 1));
+    const DataFim = new Date(Date.UTC(ano,mes,0));
     
-    client.sendMessage(chatId, `💰 Seu total de gastos é: R$${totalGastos.toFixed(2)}`);
-    return;
-  }catch(error){
-    client.sendMessage(chatId, "❌ Ao somar os gastos!");
-    return;
+    try{
+      const gastos = await prisma.gasto.findMany({
+        where:{
+          user_id: hashId,
+          data:{
+            gte: DataInicio,
+            lt: DataFim 
+          }
+        }
+      });
+      const totalGastos = gastos.reduce((total, gasto) => total + gasto.valor, 0);
+      client.sendMessage(chatId, `💰 Seu total de gastos é: R$${totalGastos.toFixed(2)}`);
+      return;
+    }catch(error){
+      client.sendMessage(chatId, "❌ Ao somar os gastos!");
+      return;
+    }
   }
 }
 
@@ -145,7 +160,6 @@ async function deletar(partes, chatId, client) {
         },
       },
     });
-
     
     client.sendMessage(chatId, "✅ Gasto deletado com sucesso!");
     return;
@@ -154,5 +168,6 @@ async function deletar(partes, chatId, client) {
     return;
   }
 }
+
 
 module.exports = { gasto, total, editar, deletar};

@@ -7,7 +7,6 @@ const encontrarCategoria = require("./categorias.js");
 const { encontrarCategoriaId } = require("./Ids.js");
 const { gasto, total, editar, deletar } = require("./functions.js");
 
-
 const client = new Client({
   authStrategy : new LocalAuth({
     dataPath: "./session" // Define um caminho para persistir a auth
@@ -76,20 +75,28 @@ client.on('message', async  (message) => {
     case "ola":
     case "Ola":
     case "Olá":
-      client.sendMessage(chatId,"🤖 Bem vindo ao chatbot financeiro! Comandos disponíveis:\n" +
-        "✅ *<Descrição> <Valor> (ex: Cinema 50)* - Registra um novo gasto.\n" +
-        "📊 *!total* - Exibe o total de gastos do mês.\n" +
-        "♻️ *!editar idGasto valor* - Altera o valor de um gasto \n" + 
-        "🗑️ *!deletar idGasto* - Remove um gasto.\n\n" +    
-        "❓ Envie um desses comandos para interagir com o bot!");
+      client.sendMessage(
+        chatId,
+        "🤖 Bem-vindo ao chatbot financeiro! Comandos disponíveis:\n" +
+          "✅ *<Descrição> <Valor> (ex: Cinema 50)* - Registra um novo gasto.\n" +
+          "📊 *!total* - Exibe o total de gastos do mês atual.\n" +
+          "📊 *!total <mês>* - Exibe o total de gastos de um mês específico (ex: !total outubro).\n" +
+          "♻️ *!editar idGasto valor* - Altera o valor de um gasto.\n" +
+          "🗑️ *!deletar idGasto* - Remove um gasto.\n\n" +
+          "❓ Envie um desses comandos para interagir com o bot!"
+      );
         break;
     case "!comandos":
-      client.sendMessage(chatId,"Comandos disponíveis:\n" +
-        "✅ *<Descrição> <Valor> (ex: Cinema 50)* - Registra um novo gasto.\n" +
-        "📊 *!total* - Exibe o total de gastos do mês.\n" +
-        "♻️ *!editar idGasto valor* - Altera o valor de um gasto \n" + 
-        "🗑️ *!deletar idGasto* - Remove um gasto.\n\n" +    
-        "❓ Envie um desses comandos para interagir com o bot!");
+      client.sendMessage(
+        chatId,
+        "🤖 Comandos disponíveis:\n" +
+          "✅ *<Descrição> <Valor> (ex: Cinema 50)* - Registra um novo gasto.\n" +
+          "📊 *!total* - Exibe o total de gastos do mês atual.\n" +
+          "📊 *!total <mês>* - Exibe o total de gastos de um mês específico (ex: !total outubro).\n" +
+          "♻️ *!editar idGasto valor* - Altera o valor de um gasto.\n" +
+          "🗑️ *!deletar idGasto* - Remove um gasto.\n\n" +
+          "❓ Envie um desses comandos para interagir com o bot!"
+      );
         break;
     case "!":
       client.sendMessage(
@@ -104,6 +111,7 @@ client.on('message', async  (message) => {
 
       if (match) {
         const descricao = match[1].trim();
+        console.log("descriçãoS:",descricao);
         const valor = parseFloat(match[2].replace(',', '.'));
         
         if (isNaN(valor)) {
@@ -113,8 +121,8 @@ client.on('message', async  (message) => {
 
         const categoria = encontrarCategoria(descricao);
         if (categoria) {
+          //console.log("categoria:",categoria);
           const categoria_id = encontrarCategoriaId(categoria);
-          console.log(categoria_id);
           gasto(partes, chatId, client, categoria, valor, categoria_id);
         }
       } else {

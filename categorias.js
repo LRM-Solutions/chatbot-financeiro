@@ -32,7 +32,7 @@ function encontrarCategoria(descricao) {
 
   const todasAsPalavras = Array.from(categoriasMapeadas.keys());
   const melhorCorrespondencia = stringSimilarity.findBestMatch(descricaoNormalizada, todasAsPalavras).bestMatch;
-  if (melhorCorrespondencia.rating > 0.70){
+  if (melhorCorrespondencia.rating > 0.68){
     return categoriasMapeadas.get(melhorCorrespondencia.target);
   }
   
