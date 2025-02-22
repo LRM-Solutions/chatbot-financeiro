@@ -1,6 +1,7 @@
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 const crypto = require("crypto");
+const { mesParaNumeros } = require("./Ids.js");
 
 async function gasto(partes, chatId, client, categoria, valor, categoria_id){
   const descricao = partes.filter(palavra => isNaN(palavra)).join(" ");
@@ -51,16 +52,30 @@ async function gasto(partes, chatId, client, categoria, valor, categoria_id){
   }
 }
 
-async function total(chatId,client){
+async function total(chatId,client, partes){
   const hashId = crypto.createHash("sha256").update(chatId).digest("hex");
+
+  const mes = mesParaNumeros(partes);
+  if(mes == null){
+    client.sendMessage(chatId, "❌ ERRO! Digite por exemplo: !total janeiro");
+    return;
+  }
   
+  const ano = new Date().getFullYear(); 
+  const DataInicio = new Date(Date.UTC(ano, mes - 1, 1)); // UTC 00:00 do primeiro dia do mês
+  const DataFim = new Date(Date.UTC(ano, mes, 0)); // UTC 23:59 do último dia do mês
+
   try{
     const gastos = await prisma.gasto.findMany({
       where:{
         user_id: hashId,
+        data:{
+          gte: DataInicio,
+          lt: DataFim 
+        }
       }
     });
-    
+
     const totalGastos = gastos.reduce((total, gasto) => total + gasto.valor, 0);
     
     client.sendMessage(chatId, `💰 Seu total de gastos é: R$${totalGastos.toFixed(2)}`);

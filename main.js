@@ -4,7 +4,7 @@ const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 const crypto = require('crypto');
 const encontrarCategoria = require("./categorias.js");
-const encontrarCategoriaId = require("./categoriaId.js");
+const { encontrarCategoriaId } = require("./Ids.js");
 const { gasto, total, editar, deletar } = require("./functions.js");
 
 
@@ -63,8 +63,8 @@ client.on('message', async  (message) => {
 
   switch(comando){
     case "!total":
-      // !total 05 / 2006
-      total(chatId,client);
+      // !total Março 
+      total(chatId,client, partes[1]);
       break;
     case "!editar":
       editar(partes, chatId, client)

@@ -1,5 +1,4 @@
 const stringSimilarity = require("string-similarity");
-
 const fs = require('fs');
 
 const rawData = fs.readFileSync('categorias.json', 'utf8'); // Lê o arquivo como string
@@ -11,7 +10,7 @@ for (const [categoria, palavras] of Object.entries(categorias)) {
     categoriasMapeadas.set(palavra.toLowerCase(), categoria);
   }
 }
-
+// ja tem uma dessa no ids.js
 function normalizarTexto(texto) {
   return texto
     .normalize("NFD") // Remove acentos
