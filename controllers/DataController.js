@@ -8,32 +8,62 @@ class DataController {
   async GastoMes(req, res) {
     try {
       const { chatId } = req.params;
-
+  
       if (!chatId) {
         return res.status(400).json({ error: "Passe o chatId" });
       }
-
-      const ano = new Date().getFullYear();
-      const DataInicio = new Date(Date.UTC(ano, 0, 1));
-      const DataFim = new Date(Date.UTC(ano + 1, 0, 0));
-      const gastosTotal = await prisma.gasto.findMany({
+  
+      const hoje = new Date();
+      const seisMesesAtras = new Date();
+      seisMesesAtras.setMonth(hoje.getMonth() - 6);
+  
+      const gastos = await prisma.gasto.findMany({
         where: {
           user_id: chatId,
           data: {
-            gte: DataInicio,
-            lt: DataFim,
+            gte: seisMesesAtras,
+            lte: hoje,
           },
         },
       });
-
-      if (!gastosTotal) {
-        return res.status(400).json({ error: "nenhum gasto" });
+  
+      if (!gastos || gastos.length === 0) {
+        return res.status(404).json({ error: "Nenhum gasto encontrado" });
       }
-
-      return res.status(200).json(gastosTotal);
+  
+      const chartData = {
+        labels: [],
+        datasets: [
+          {
+            label: "Gastos por Mês",
+            data: [],
+            backgroundColor: [],
+            hoverOffset: 4,
+          },
+        ],
+      };
+  
+      const gastosAgrupadoMes = gastos.reduce((acc, gasto) => {
+        const mesAno = gasto.data.toLocaleDateString('pt-BR', { year: 'numeric', month: 'long' });
+        
+        if (!acc[mesAno]) {
+          acc[mesAno] = 0;
+        }
+        
+        acc[mesAno] += gasto.valor;
+        return acc;
+      }, {});
+  
+      Object.entries(gastosAgrupadoMes).forEach(([mesAno, total], i) => {
+        chartData.labels.push(mesAno);
+        chartData.datasets[0].data.push(total);
+        chartData.datasets[0].backgroundColor.push(genereteColorByIndex(i));
+      });
+  
+      return res.status(200).json(chartData);
+  
     } catch (error) {
-      console.log(error);
-      return res.status(400).json(error);
+      return res.status(500).json({ error: "Erro ao buscar gastos", detalhes: error.message });
     }
   }
 
