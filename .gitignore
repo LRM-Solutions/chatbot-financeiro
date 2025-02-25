@@ -4,4 +4,4 @@ node_modules
 /session/
 
 # Keep environment variables out of version control
-.env
+
