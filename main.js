@@ -6,6 +6,7 @@ const crypto = require('crypto');
 const encontrarCategoria = require("./categorias.js");
 const { encontrarCategoriaId } = require("./Ids.js");
 const { gasto, total, editar, deletar } = require("./functions.js");
+const App = require("./app.js");
 
 const client = new Client({
   authStrategy : new LocalAuth({
@@ -132,4 +133,5 @@ client.on('message', async  (message) => {
   }
 });
 
+App.listen(3333);
 client.initialize();
