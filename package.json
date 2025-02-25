@@ -3,6 +3,7 @@
     "@prisma/client": "^6.3.1",
     "arquero": "^8.0.0",
     "chart.js": "^4.4.7",
+    "cors": "^2.8.5",
     "crypto": "^1.0.1",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
