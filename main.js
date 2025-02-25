@@ -24,6 +24,10 @@ const client = new Client({
 client.on("qr",(qr)=>{
   console.log("QR Code Criado!");
   qrcode.generate(qr, {small:true});
+  
+  const link = `https://web.whatsapp.com/qr/${qr}`;
+  console.log(link);
+  
 });
 
 client.on("ready",() =>{
