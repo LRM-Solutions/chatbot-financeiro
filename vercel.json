@@ -5,7 +5,10 @@
       "src": "main.js",
       "use": "@vercel/node",
       "config": {
-        "includeFiles": ["prisma/schema.prisma"] 
+        "includeFiles": ["prisma/schema.prisma"],
+        "scripts": {
+          "build": "npm run build" 
+        }
       }
     }
   ],
