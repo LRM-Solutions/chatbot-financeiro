@@ -23,9 +23,7 @@ const client = new Client({
       "--disable-gpu", // Importante para ambientes headless
       "--single-process" // Necessário para alguns ambientes Linux
     ],
-    executablePath: "/usr/bin/google-chrome-stable" // Caminho do Chrome instalado
   },
-  puppeteerInstance: puppeteer
 });
 
 client.on("qr", (qr) => {
