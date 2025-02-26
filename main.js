@@ -16,7 +16,14 @@ const client = new Client({
   }),
   puppeteer: {
     headless: true,
-    args: ["--no-sandbox", "--disable-setuid-sandbox"],
+    args: [
+      "--no-sandbox",
+      "--disable-setuid-sandbox",
+      "--disable-dev-shm-usage", // Evita problemas de memória
+      "--disable-gpu", // Importante para ambientes headless
+      "--single-process" // Necessário para alguns ambientes Linux
+    ],
+    executablePath: "/usr/bin/google-chrome-stable" // Caminho do Chrome instalado
   },
 });
 
