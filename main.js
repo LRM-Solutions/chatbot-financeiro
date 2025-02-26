@@ -151,9 +151,9 @@ client.on("message", async (message) => {
       break;
   }
 });
-const server = App.listen(3333);
 
-if (server) {
-  console.log("servidor rodando");
-}
+App.listen(3000, '0.0.0.0', () =>{
+  console.log('Servidor Rodando na porta 3000');
+});
+
 client.initialize();
