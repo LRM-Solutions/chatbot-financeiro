@@ -9,7 +9,7 @@ const { gasto, total, editar, deletar } = require("./functions.js");
 const App = require("./app.js");
 const { log } = require("console");
 require("dotenv").config({ path: ".env.development" });
-
+const puppeteer = require('puppeteer');
 const client = new Client({
   authStrategy: new LocalAuth({
     dataPath: "./session", // Define um caminho para persistir a auth
@@ -25,6 +25,7 @@ const client = new Client({
     ],
     executablePath: "/usr/bin/google-chrome-stable" // Caminho do Chrome instalado
   },
+  puppeteerInstance: puppeteer
 });
 
 client.on("qr", (qr) => {
