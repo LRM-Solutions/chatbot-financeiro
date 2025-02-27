@@ -1,110 +1,140 @@
-const { PrismaClient } = require('@prisma/client');
+const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 const crypto = require("crypto");
 const { mesParaNumeros } = require("./Ids.js");
 
-async function gasto(partes, chatId, client, categoria, valor, categoria_id){
+async function gasto(partes, chatId, client, categoria, valor, categoria_id) {
   const descricao = partes.slice(0, -1).join(" ");
   const hashId = crypto.createHash("sha256").update(chatId).digest("hex");
-  
-  console.log("descrição:",descricao);
 
-  if(isNaN(valor)){
+  console.log("descrição:", descricao);
+
+  if (isNaN(valor)) {
     client.sendMessage(chatId, "❌ O valor precisa ser um número!");
     return;
   }
 
-  try{
-    await prisma.$transaction(async(prisma)=>{
+  try {
+    await prisma.$transaction(async (prisma) => {
       const lastGasto = await prisma.gasto.aggregate({
         where: { user_id: hashId },
         _max: {
-          gasto_id: true
-        }
+          gasto_id: true,
+        },
       });
 
       const nextId = (lastGasto._max.gasto_id || 0) + 1;
 
       const newGasto = await prisma.gasto.create({
-        data:{
-          valor:valor,
-          descricao:descricao,
+        data: {
+          valor: valor,
+          descricao: descricao,
           user_id: hashId,
           categoria: categoria,
           categoria_id: categoria_id,
-          gasto_id: nextId
-        }
+          gasto_id: nextId,
+        },
       });
 
       client.sendMessage(
         chatId,
         `📌 *Gasto adicionado com sucesso!* \n\n` +
-        `💵 *Valor:* R$${valor.toFixed(2)}\n` +
-        `📂 *Categoria:* ${categoria}\n` +
-        `📝 *Descrição:* ${descricao}\n` +
-        `🆔 *ID do Gasto:* ${newGasto.gasto_id}\n\n` +
-        `✅ Tudo certo! Seu gasto foi registrado.`
+          `💵 *Valor:* R$${valor.toFixed(2)}\n` +
+          `📂 *Categoria:* ${categoria}\n` +
+          `📝 *Descrição:* ${descricao}\n` +
+          `🆔 *ID do Gasto:* ${newGasto.gasto_id}\n\n` +
+          `✅ Tudo certo! Seu gasto foi registrado.`
       );
-    })
+    });
     return;
-  
-  }catch(error){
+  } catch (error) {
     console.log(error);
     client.sendMessage(chatId, "⚠️ Ops, tente novamente em alguns segundos!");
     return;
   }
 }
 
-async function total(chatId,client, partes){
+async function total(chatId, client, partes) {
   const hashId = crypto.createHash("sha256").update(chatId).digest("hex");
 
-  if(partes == null){
-    try{
+  if (partes == null) {
+    try {
       const gastos = await prisma.gasto.findMany({
-        where:{
-          user_id: hashId
-        }
+        where: {
+          user_id: hashId,
+        },
       });
-      
-      const totalGastos = gastos.reduce((total, gasto) => total + gasto.valor, 0);
-      client.sendMessage(chatId, `💰 Seu total de gastos é: R$${totalGastos.toFixed(2)}`);
+
+      const totalGastos = gastos.reduce(
+        (total, gasto) => total + gasto.valor,
+        0
+      );
+      let listaGastos = gastos
+        .map(
+          (gasto, index) =>
+            `${index + 1} - ${gasto.descricao} R$${gasto.valor.toFixed(2)}`
+        )
+        .join("\n");
+      client.sendMessage(
+        chatId,
+        `💰 Seu total de gastos é: R$${totalGastos.toFixed(
+          2
+        )}\n\n${listaGastos}`
+      );
       return;
-    }catch(error){
+    } catch (error) {
       console.log(error);
       client.sendMessage(chatId, "Erro!");
       return;
     }
-  }else{
+  } else {
     const mes = mesParaNumeros(partes);
-    console.log("mes:",mes);
+    console.log("mes:", mes);
     const ano = new Date().getFullYear();
-    const DataInicio = new Date(Date.UTC(ano,mes -1, 1));
-    const DataFim = new Date(Date.UTC(ano,mes,0));
-    
-    try{
+    const DataInicio = new Date(Date.UTC(ano, mes - 1, 1));
+    const DataFim = new Date(Date.UTC(ano, mes, 0));
+
+    try {
       const gastos = await prisma.gasto.findMany({
-        where:{
+        where: {
           user_id: hashId,
-          data:{
+          data: {
             gte: DataInicio,
-            lt: DataFim 
-          }
-        }
+            lt: DataFim,
+          },
+        },
       });
-      const totalGastos = gastos.reduce((total, gasto) => total + gasto.valor, 0);
-      client.sendMessage(chatId, `💰 Seu total de gastos é: R$${totalGastos.toFixed(2)}`);
+      const totalGastos = gastos.reduce(
+        (total, gasto) => total + gasto.valor,
+        0
+      );
+      let listaGastos = gastos
+        .map(
+          (gasto, index) =>
+            `${index + 1} - ${gasto.descricao} R$${gasto.valor.toFixed(2)}`
+        )
+        .join("\n");
+      client.sendMessage(
+        chatId,
+        `💰 Seu total de gastos é: R$${totalGastos.toFixed(
+          2
+        )}\n\n${listaGastos}`
+      );
       return;
-    }catch(error){
+    } catch (error) {
       client.sendMessage(chatId, "❌ Ao somar os gastos!");
       return;
     }
   }
 }
 
-async function editar(partes,chatId, client){
+async function editar(partes, chatId, client) {
   const hashId = crypto.createHash("sha256").update(chatId).digest("hex");
   if (partes.length < 3) {
-    client.sendMessage(chatId, "❌ Formato inválido! Use: ♻️ !update idGasto valor");
+    client.sendMessage(
+      chatId,
+      "❌ Formato inválido! Use: ♻️ !update idGasto valor"
+    );
     return;
   }
 
@@ -116,22 +146,25 @@ async function editar(partes,chatId, client){
     return;
   }
 
-  try{
+  try {
     await prisma.gasto.update({
-      where:{
-        user_id_gasto_id:{
+      where: {
+        user_id_gasto_id: {
           user_id: hashId,
           gasto_id: idGasto,
         },
       },
-      data:{
-        valor:valor
+      data: {
+        valor: valor,
       },
     });
-    
-    client.sendMessage(chatId, `✅ Gasto atualizado com sucesso! Novo valor: R$${valor.toFixed(2)}`);
+
+    client.sendMessage(
+      chatId,
+      `✅ Gasto atualizado com sucesso! Novo valor: R$${valor.toFixed(2)}`
+    );
     return;
-  }catch(error){
+  } catch (error) {
     client.sendMessage(chatId, "❌ Erro ao editar o valor!");
     return;
   }
@@ -160,7 +193,7 @@ async function deletar(partes, chatId, client) {
         },
       },
     });
-    
+
     client.sendMessage(chatId, "✅ Gasto deletado com sucesso!");
     return;
   } catch (error) {
@@ -169,5 +202,4 @@ async function deletar(partes, chatId, client) {
   }
 }
 
-
-module.exports = { gasto, total, editar, deletar};
+module.exports = { gasto, total, editar, deletar };

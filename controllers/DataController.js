@@ -107,6 +107,40 @@ class DataController {
     }
   }
 
+  async GastoMesAtualLista(req, res) {
+    try {
+      const { chatId } = req.params;
+
+      if (!chatId) {
+        return res.status(400).json({ error: "Passe o chatId" });
+      }
+
+      const hoje = new Date();
+      const primeiroDiaMes = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
+      const ultimoDiaMes = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0);
+
+      const gastos = await prisma.gasto.findMany({
+        where: {
+          user_id: chatId,
+          data: {
+            gte: primeiroDiaMes,
+            lte: ultimoDiaMes,
+          },
+        },
+      });
+
+      if (!gastos || gastos.length === 0) {
+        return res.status(404).json({ error: "Nenhum gasto encontrado" });
+      }
+
+      return res.status(200).json(gastos);
+    } catch (error) {
+      return res
+        .status(500)
+        .json({ error: "Erro ao buscar gastos", detalhes: error.message });
+    }
+  }
+
   async GastosCategoria(req, res) {
     try {
       const { chatId } = req.params;

@@ -8,9 +8,13 @@ routes.get("/", (req, res) => {
 
 routes.get("/gastos-mes/:chatId", DataController.GastoMes);
 routes.get(
+  "/gastos-mes-atual-lista/:chatId",
+  DataController.GastoMesAtualLista
+);
+
+routes.get(
   "/gastos-total-mes-atual/:chatId",
   DataController.TotalGastosMesAtual
 );
 routes.get("/gastos-categoria/:chatId", DataController.GastosCategoria);
-
 module.exports = routes;

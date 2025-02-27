@@ -111,7 +111,7 @@ client.on("message", async (message) => {
     case "!relatorio":
       client.sendMessage(
         chatId,
-        "📊 Segue seu relatório de gastos:\n" +
+        "📊 Segue seu relatório de gastos:\n\n" +
           `http://dashboard-financeiai.lrmsolutions.com.br:8080/dashboard/${hashId}`
       );
       break;
