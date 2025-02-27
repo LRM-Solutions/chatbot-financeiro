@@ -61,9 +61,9 @@ function mesParaNumeros(mes) {
 
 function genereteColorByIndex(index) {
   const colors = [
-    "#FF0000", "#FF6600", "#FFCC00", "#33CC33", "#0099FF",
-    "#6600CC", "#FF3399", "#FF9933", "#66CCFF", "#006600",
-    "#CC0000", "#9933FF", "#33FFCC", "#FFFF66", "#3366FF"
+    "#FF0000", "#0099FF", "#33CC33", "#FF00FF", // vermelho, azul, verde, magenta
+    "#CC0000", "#3366FF", "#00CC66", "#CC33FF", // variações para repetir o padrão
+    "#FF6666", "#66CCFF", "#66FF66", "#FF66FF"
   ];
   return colors[index % colors.length];
 }
