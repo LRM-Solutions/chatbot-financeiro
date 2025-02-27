@@ -21,7 +21,7 @@ const client = new Client({
       "--disable-setuid-sandbox",
       "--disable-dev-shm-usage", // Evita problemas de memória
       "--disable-gpu", // Importante para ambientes headless
-      "--single-process" // Necessário para alguns ambientes Linux
+      "--single-process", // Necessário para alguns ambientes Linux
     ],
   },
 });
@@ -91,6 +91,7 @@ client.on("message", async (message) => {
           "📊 *!total <mês>* - Exibe o total de gastos de um mês específico (ex: !total outubro).\n" +
           "♻️ *!editar idGasto valor* - Altera o valor de um gasto.\n" +
           "🗑️ *!deletar idGasto* - Remove um gasto.\n\n" +
+          "📊 *!relatorio - Exibe um relatório dos seus gastos.\n" +
           "❓ Envie um desses comandos para interagir com o bot!"
       );
       break;
@@ -103,13 +104,15 @@ client.on("message", async (message) => {
           "📊 *!total <mês>* - Exibe o total de gastos de um mês específico (ex: !total outubro).\n" +
           "♻️ *!editar idGasto valor* - Altera o valor de um gasto.\n" +
           "🗑️ *!deletar idGasto* - Remove um gasto.\n\n" +
+          "📊 *!relatorio - Exibe um relatório dos seus gastos.\n" +
           "❓ Envie um desses comandos para interagir com o bot!"
       );
       break;
     case "!relatorio":
       client.sendMessage(
         chatId,
-        "📊 Segue seu relatório de gastos:\n" + `localhost:5173/${hashId}`
+        "📊 Segue seu relatório de gastos:\n" +
+          `http://dashboard-financeiai.lrmsolutions.com.br:8080/dashboard/${hashId}`
       );
       break;
     case "!":
@@ -152,8 +155,8 @@ client.on("message", async (message) => {
   }
 });
 
-App.listen(3000, '0.0.0.0', () =>{
-  console.log('Servidor Rodando na porta 3000');
+App.listen(3000, "0.0.0.0", () => {
+  console.log("Servidor Rodando na porta 3000");
 });
 
 client.initialize();
