@@ -60,21 +60,13 @@ function mesParaNumeros(mes) {
 }
 
 function genereteColorByIndex(index) {
-  // Defina o valor base hexadecimal #05845D
-  const seed = (index * 12345 + 67890) % 256;
-
-  // Gera valores aleatórios para R, G, e B, e aplica uma fórmula de modificação
-  const r = (seed + Math.floor(Math.random() * 128) + index * 20) % 256;
-  const g = (seed + Math.floor(Math.random() * 128) + index * 30) % 256;
-  const b = (seed + Math.floor(Math.random() * 128) + index * 40) % 256;
-
-  // Converte os valores RGB para hexadecimal
-  const hexR = r.toString(16).padStart(2, "0");
-  const hexG = g.toString(16).padStart(2, "0");
-  const hexB = b.toString(16).padStart(2, "0");
-
-  // Retorna a cor gerada no formato hexadecimal
-  return `#${hexR}${hexG}${hexB}`;
+  const colors = [
+    "#FF0000", "#FF6600", "#FFCC00", "#33CC33", "#0099FF",
+    "#6600CC", "#FF3399", "#FF9933", "#66CCFF", "#006600",
+    "#CC0000", "#9933FF", "#33FFCC", "#FFFF66", "#3366FF"
+  ];
+  return colors[index % colors.length];
 }
+
 
 module.exports = { encontrarCategoriaId, mesParaNumeros, genereteColorByIndex };
