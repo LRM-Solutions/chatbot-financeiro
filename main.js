@@ -90,8 +90,8 @@ client.on("message", async (message) => {
           "📊 *!total* - Exibe o total de gastos do mês atual.\n" +
           "📊 *!total <mês>* - Exibe o total de gastos de um mês específico (ex: !total outubro).\n" +
           "♻️ *!editar idGasto valor* - Altera o valor de um gasto.\n" +
-          "🗑️ *!deletar idGasto* - Remove um gasto.\n\n" +
-          "📊 *!relatorio - Exibe um relatório dos seus gastos.\n" +
+          "🗑️ *!deletar idGasto* - Remove um gasto.\n" +
+          "📊 *!relatorio* - Exibe um relatório dos seus gastos.\n\n" +
           "❓ Envie um desses comandos para interagir com o bot!"
       );
       break;
@@ -103,8 +103,8 @@ client.on("message", async (message) => {
           "📊 *!total* - Exibe o total de gastos do mês atual.\n" +
           "📊 *!total <mês>* - Exibe o total de gastos de um mês específico (ex: !total outubro).\n" +
           "♻️ *!editar idGasto valor* - Altera o valor de um gasto.\n" +
-          "🗑️ *!deletar idGasto* - Remove um gasto.\n\n" +
-          "📊 *!relatorio - Exibe um relatório dos seus gastos.\n" +
+          "🗑️ *!deletar idGasto* - Remove um gasto.\n" +
+          "📊 *!relatorio* - Exibe um relatório dos seus gastos.\n\n" +
           "❓ Envie um desses comandos para interagir com o bot!"
       );
       break;

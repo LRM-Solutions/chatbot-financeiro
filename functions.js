@@ -72,7 +72,9 @@ async function total(chatId, client, partes) {
       let listaGastos = gastos
         .map(
           (gasto, index) =>
-            `${index + 1} - ${gasto.descricao} R$${gasto.valor.toFixed(2)}`
+            `${index + 1} - ${gasto.descricao} R$${gasto.valor.toFixed(
+              2
+            )} - ID: ${gasto.gasto_id}`
         )
         .join("\n");
       client.sendMessage(
