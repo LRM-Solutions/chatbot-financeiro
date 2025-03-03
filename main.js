@@ -6,7 +6,7 @@ const crypto = require("crypto");
 
 const App = require("./app.js");
 
-require("dotenv").config({ path: ".env.development" });
+require("dotenv").config({ path: ".env" });
 
 const callAI = require("./ai/ai.js");
 
