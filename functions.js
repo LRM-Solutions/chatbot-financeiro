@@ -2,19 +2,23 @@ const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 const crypto = require("crypto");
 const { mesParaNumeros } = require("./Ids.js");
+const { encontrarCategoriaId } = require("./Ids.js");
 
-async function gasto(partes, chatId, client, categoria, valor, categoria_id) {
-  const descricao = partes.slice(0, -1).join(" ");
+async function gasto(
+  descricao,
+  chatId,
+  client,
+  categoria,
+  valor,
+  categoria_id
+) {
   const hashId = crypto.createHash("sha256").update(chatId).digest("hex");
 
   console.log("descrição:", descricao);
 
-  if (isNaN(valor)) {
-    client.sendMessage(chatId, "❌ O valor precisa ser um número!");
-    return;
-  }
-
   try {
+    let newGasto;
+
     await prisma.$transaction(async (prisma) => {
       const lastGasto = await prisma.gasto.aggregate({
         where: { user_id: hashId },
@@ -25,7 +29,7 @@ async function gasto(partes, chatId, client, categoria, valor, categoria_id) {
 
       const nextId = (lastGasto._max.gasto_id || 0) + 1;
 
-      const newGasto = await prisma.gasto.create({
+      newGasto = await prisma.gasto.create({
         data: {
           valor: valor,
           descricao: descricao,
@@ -35,18 +39,8 @@ async function gasto(partes, chatId, client, categoria, valor, categoria_id) {
           gasto_id: nextId,
         },
       });
-
-      client.sendMessage(
-        chatId,
-        `📌 *Gasto adicionado com sucesso!* \n\n` +
-          `💵 *Valor:* R$${valor.toFixed(2)}\n` +
-          `📂 *Categoria:* ${categoria}\n` +
-          `📝 *Descrição:* ${descricao}\n` +
-          `🆔 *ID do Gasto:* ${newGasto.gasto_id}\n\n` +
-          `✅ Tudo certo! Seu gasto foi registrado.`
-      );
     });
-    return;
+    return newGasto;
   } catch (error) {
     console.log(error);
     client.sendMessage(chatId, "⚠️ Ops, tente novamente em alguns segundos!");
@@ -54,10 +48,86 @@ async function gasto(partes, chatId, client, categoria, valor, categoria_id) {
   }
 }
 
-async function total(chatId, client, partes) {
+async function adicionarGastos(chatId, items) {
   const hashId = crypto.createHash("sha256").update(chatId).digest("hex");
 
-  if (partes == null) {
+  try {
+    let gastos = [];
+
+    await prisma.$transaction(async (prisma) => {
+      const lastGasto = await prisma.gasto.aggregate({
+        where: { user_id: hashId },
+        _max: {
+          gasto_id: true,
+        },
+      });
+
+      const nextId = (lastGasto._max.gasto_id || 0) + 1;
+
+      gastos = await Promise.all(
+        items.map(async (item, index) => {
+          const { valor, descricao, categoria } = item;
+
+          const categoriaId = encontrarCategoriaId(categoria); // <- Import a merda da funçao aqui
+
+          const generatedItem = await prisma.gasto.create({
+            data: {
+              valor: valor,
+              descricao: descricao,
+              user_id: hashId,
+              categoria: categoria,
+              categoria_id: categoriaId,
+              gasto_id: nextId + index,
+            },
+          });
+
+          return generatedItem;
+        })
+      );
+    });
+
+    return gastos;
+  } catch (err) {
+    console.log("Error: ", err);
+    return {
+      error: true,
+      errorMessage: "Ops, tente novamente em alguns segundos!",
+    };
+  }
+}
+
+async function getTotal(chatId, client, dataInicio, dataFim, categoria_id) {
+  const hashId = crypto.createHash("sha256").update(chatId).digest("hex");
+  let data = dataInicio && dataFim ? { gte: dataInicio, lt: dataFim } : {};
+
+  const gastos = await prisma.gasto.findMany({
+    where: {
+      user_id: hashId,
+      data,
+      categoria_id,
+    },
+  });
+
+  const totalGastos = gastos.reduce((total, gasto) => total + gasto.valor, 0);
+  // let listaGastos = gastos
+  //   .map(
+  //     (gasto, index) =>
+  //       `${index + 1} - ${gasto.descricao} R$${gasto.valor.toFixed(2)} - ID: ${
+  //         gasto.gasto_id
+  //       }`
+  //   )
+  //   .join("\n");
+  // // client.sendMessage(
+  // //   chatId,
+  // //   `💰 Seu total de gastos é: R$${totalGastos.toFixed(2)}\n\n${listaGastos}`
+  // // );
+  return { totalGastos, gastos };
+}
+
+async function total(chatId, client, mes) {
+  const hashId = crypto.createHash("sha256").update(chatId).digest("hex");
+
+  if (mes == null) {
     try {
       const gastos = await prisma.gasto.findMany({
         where: {
@@ -90,7 +160,7 @@ async function total(chatId, client, partes) {
       return;
     }
   } else {
-    const mes = mesParaNumeros(partes);
+    const mes = mesParaNumeros(mes);
     console.log("mes:", mes);
     const ano = new Date().getFullYear();
     const DataInicio = new Date(Date.UTC(ano, mes - 1, 1));
@@ -204,4 +274,4 @@ async function deletar(partes, chatId, client) {
   }
 }
 
-module.exports = { gasto, total, editar, deletar };
+module.exports = { gasto, total, editar, deletar, getTotal, adicionarGastos };

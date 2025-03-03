@@ -3,12 +3,12 @@ const qrcode = require("qrcode-terminal");
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 const crypto = require("crypto");
-const encontrarCategoria = require("./categorias.js");
-const { encontrarCategoriaId } = require("./Ids.js");
-const { gasto, total, editar, deletar } = require("./functions.js");
+
 const App = require("./app.js");
-const { log } = require("console");
+
 require("dotenv").config({ path: ".env.development" });
+
+const callAI = require("./ai/ai.js");
 
 const client = new Client({
   authStrategy: new LocalAuth({
@@ -41,8 +41,6 @@ client.on("message", async (message) => {
   const chatId = message.from;
   const hashId = crypto.createHash("sha256").update(chatId).digest("hex");
   const msg = message.body.trim();
-  const partes = msg.split(" ");
-  const comando = partes[0].toLowerCase();
 
   try {
     await prisma.$transaction(async (prisma) => {
@@ -68,91 +66,8 @@ client.on("message", async (message) => {
     console.log(error);
   }
 
-  switch (comando) {
-    case "!total":
-      // !total Março
-      total(chatId, client, partes[1]);
-      break;
-    case "!editar":
-      editar(partes, chatId, client);
-      break;
-    case "!deletar":
-      deletar(partes, chatId, client);
-      break;
-    case "olá":
-    case "ola":
-    case "Ola":
-    case "Olá":
-      client.sendMessage(
-        chatId,
-        "🤖 Bem-vindo ao chatbot financeiro! Comandos disponíveis:\n" +
-          "✅ *<Descrição> <Valor> (ex: Cinema 50)* - Registra um novo gasto.\n" +
-          "📊 *!total* - Exibe o total de gastos do mês atual.\n" +
-          "📊 *!total <mês>* - Exibe o total de gastos de um mês específico (ex: !total outubro).\n" +
-          "♻️ *!editar idGasto valor* - Altera o valor de um gasto.\n" +
-          "🗑️ *!deletar idGasto* - Remove um gasto.\n" +
-          "📊 *!relatorio* - Exibe um relatório dos seus gastos.\n\n" +
-          "❓ Envie um desses comandos para interagir com o bot!"
-      );
-      break;
-    case "!comandos":
-      client.sendMessage(
-        chatId,
-        "🤖 Comandos disponíveis:\n" +
-          "✅ *<Descrição> <Valor> (ex: Cinema 50)* - Registra um novo gasto.\n" +
-          "📊 *!total* - Exibe o total de gastos do mês atual.\n" +
-          "📊 *!total <mês>* - Exibe o total de gastos de um mês específico (ex: !total outubro).\n" +
-          "♻️ *!editar idGasto valor* - Altera o valor de um gasto.\n" +
-          "🗑️ *!deletar idGasto* - Remove um gasto.\n" +
-          "📊 *!relatorio* - Exibe um relatório dos seus gastos.\n\n" +
-          "❓ Envie um desses comandos para interagir com o bot!"
-      );
-      break;
-    case "!relatorio":
-      client.sendMessage(
-        chatId,
-        "📊 Segue seu relatório de gastos:\n\n" +
-          `http://dashboard-financeiai.lrmsolutions.com.br:8080/dashboard/${hashId}`
-      );
-      break;
-    case "!":
-      client.sendMessage(
-        chatId,
-        "⚠️ Ops! Parece que esse comando não existe ou foi digitado incorretamente.\n\n" +
-          "💡 Para ver a lista completa de comandos disponíveis, digite: *!comandos*"
-      );
-      break;
-    default:
-      const regexGasto = /(.+?)\s+(\d+[\.,]?\d*)$/;
-      const match = msg.match(regexGasto);
-
-      if (match) {
-        const descricao = match[1].trim();
-        console.log("descriçãoS:", descricao);
-        const valor = parseFloat(match[2].replace(",", "."));
-
-        if (isNaN(valor)) {
-          client.sendMessage(
-            chatId,
-            "❌ Valor inválido! Use: *Descrição Valor* (ex: Uber 25.50)"
-          );
-          return;
-        }
-
-        const categoria = encontrarCategoria(descricao);
-        if (categoria) {
-          //console.log("categoria:",categoria);
-          const categoria_id = encontrarCategoriaId(categoria);
-          gasto(partes, chatId, client, categoria, valor, categoria_id);
-        }
-      } else {
-        client.sendMessage(
-          chatId,
-          `🤖 Não entendi! Para registrar um gasto, use:\n*<Descrição> <Valor>* (ex: Cinema 50)\n\nDigite *!comandos* para ver todas as opções.`
-        );
-      }
-      break;
-  }
+  const response = await callAI({ message: msg, chatId, client });
+  client.sendMessage(chatId, response);
 });
 
 App.listen(3000, "0.0.0.0", () => {
