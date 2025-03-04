@@ -83,7 +83,7 @@ const callAI = async ({ message, chatId, client }) => {
               "Categoria do gasto - As categorias disponiveis são: Alimentação, Transporte, Lazer, Saúde, Compras, Educação, Moradia, Outros"
             ),
         }),
-        description: `Vai ser chamado quando o usuario solicitar o histórico ou o total de gastos dele, se o usuário não especificar o período, você deve retornar todos os gastos do mês atual como parametro, a data de hoje é ${new Date().toLocaleDateString()}
+        description: `Vai ser chamado quando o usuario solicitar o histórico ou o total de gastos dele, se o usuário não especificar o período, você deve retornar todos os gastos do mês atual como parametro, a data de hoje é ${new Date().toISOString()}
 
         Exemplo de resposta:
 
