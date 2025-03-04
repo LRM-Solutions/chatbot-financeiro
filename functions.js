@@ -220,8 +220,10 @@ async function editar(chatId, items) {
               categoria_id: categoriaId,
             },
             where:{
-              gasto_id: idGasto,
-              user_id: hashId,
+              user_id_gasto_id: {
+                user_id: hashId,
+                gasto_id: idGasto,
+              },
             },
           });
 
