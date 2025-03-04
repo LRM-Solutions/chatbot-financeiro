@@ -200,45 +200,43 @@ async function total(chatId, client, mes) {
   }
 }
 
-async function editar(partes, chatId, client) {
+async function editar(chatId, items) {
   const hashId = crypto.createHash("sha256").update(chatId).digest("hex");
-  if (partes.length < 3) {
-    client.sendMessage(
-      chatId,
-      "❌ Formato inválido! Use: ♻️ !update idGasto valor"
-    );
-    return;
-  }
+  try{
+    let gastos = [];
 
-  const idGasto = parseInt(partes[1]);
-  const valor = parseFloat(partes[2]);
+    await prisma.$transaction(async(prisma)=>{
+      gastos = await Promise.all(
+        items.map(async (item,index)=>{
+          const { valor, descricao, categoria, idGasto } = item;
 
-  if (isNaN(idGasto) || isNaN(valor)) {
-    client.sendMessage(chatId, "❌ O ID do gasto e o valor devem ser números!");
-    return;
-  }
+          const categoriaId = encontrarCategoriaId(categoria);
 
-  try {
-    await prisma.gasto.update({
-      where: {
-        user_id_gasto_id: {
-          user_id: hashId,
-          gasto_id: idGasto,
-        },
-      },
-      data: {
-        valor: valor,
-      },
-    });
+          const editedItem = await prisma.gasto.update({
+            data: {
+              valor: valor,
+              descricao: descricao,
+              categoria: categoria,
+              categoria_id: categoriaId,
+            },
+            where:{
+              gasto_id: idGasto,
+              user_id: hashId,
+            },
+          });
 
-    client.sendMessage(
-      chatId,
-      `✅ Gasto atualizado com sucesso! Novo valor: R$${valor.toFixed(2)}`
-    );
-    return;
-  } catch (error) {
-    client.sendMessage(chatId, "❌ Erro ao editar o valor!");
-    return;
+          return editedItem;
+          })
+        );
+      });
+
+      return gastos;
+  }catch(err){
+    console.log("Error: ", err);
+    return {
+      error: true,
+      errorMessage: "Ops, tente novamente em alguns segundos!",
+    };
   }
 }
 

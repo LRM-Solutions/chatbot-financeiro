@@ -2,7 +2,7 @@ const { openai } = require("@ai-sdk/openai");
 const { generateText, tool } = require("ai");
 const { param } = require("../routes");
 const { z } = require("zod");
-const { adicionarGastos, getTotal } = require("../functions.js");
+const { adicionarGastos, getTotal, editar } = require("../functions.js");
 const { encontrarCategoriaId } = require("../Ids.js");
 const crypto = require("crypto");
 
@@ -131,6 +131,40 @@ const callAI = async ({ message, chatId, client }) => {
           };
         },
       }),
+      editarGasto: tool({
+        parameters: z.object({
+          // Id do gasto + Items
+          items: z.array(
+            z.object({
+              descricao: z.string().describe("Descrição do Gasto!"),
+              valor: z.number().describe("Valor do gasto"),
+              categoria: z.string().describe(
+                `Categoria do gasto - As categorias disponiveis são: Alimentação, Transporte, Lazer, Saúde, Compras, Educação, Moradia, Outros`
+              ),
+              idGasto: z.number().describe("Número que identifica o gasto a ser alterado!"),
+            })
+          ),
+        }),
+
+        description: `Vai ser chamado quando alguém quiser editar um ou mais gastos, você irá editar pelo id do gasto para o usuário, você sempre tentará atribuir uma das categorias disponíveis para o gasto, caso não seja possível, você irá adicionar a categoria 'Outros'
+        
+          exemplo de retorno:
+   
+            📌 *Gasto Editado com Sucesso*
+            💵 *Valor:* R$ valor do gasto
+            📂 *Categoria: categoria do gasto*
+            📝 *Descrição: descricao do gasto* 
+            🆔 *ID do Gasto: id do gasto*
+
+          `,
+        execute: async ({ items }) => {
+          console.log(JSON.stringify(items));
+          
+          const res = await editar(chatId, items);
+          return res;
+        },
+      }),
+      
     },
     prompt: message,
     maxSteps: 5,
