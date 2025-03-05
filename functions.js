@@ -207,22 +207,18 @@ async function editar(chatId, items) {
 
     await prisma.$transaction(async(prisma)=>{
       gastos = await Promise.all(
-        items.map(async (item,index)=>{
-          const { valor, descricao, categoria, idGasto } = item;
+        items.map(async (item)=>{
+          
+          const data = item;
 
-          const categoriaId = encontrarCategoriaId(categoria);
+          //const categoriaId = encontrarCategoriaId(categoria);
 
           const editedItem = await prisma.gasto.update({
-            data: {
-              valor: valor,
-              descricao: descricao,
-              categoria: categoria,
-              categoria_id: categoriaId,
-            },
+            data,
             where:{
               user_id_gasto_id: {
                 user_id: hashId,
-                gasto_id: idGasto,
+                gasto_id: data.idGasto,
               },
             },
           });

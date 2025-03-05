@@ -136,9 +136,9 @@ const callAI = async ({ message, chatId, client }) => {
           // Id do gasto + Items
           items: z.array(
             z.object({
-              descricao: z.string().describe("Descrição do Gasto!"),
-              valor: z.number().describe("Valor do gasto"),
-              categoria: z.string().describe(
+              descricao: z.string().optional().describe("Descrição do Gasto!"),
+              valor: z.number().optional().describe("Valor do gasto"),
+              categoria: z.string().optional().describe(
                 `Categoria do gasto - As categorias disponiveis são: Alimentação, Transporte, Lazer, Saúde, Compras, Educação, Moradia, Outros`
               ),
               idGasto: z.number().describe("Número que identifica o gasto a ser alterado!"),
@@ -146,8 +146,8 @@ const callAI = async ({ message, chatId, client }) => {
           ),
         }),
 
-        description: `Vai ser chamado quando alguém quiser editar um ou mais gastos, você irá editar pelo id do gasto para o usuário, você sempre tentará atribuir uma das categorias disponíveis para o gasto, caso não seja possível, você irá adicionar a categoria 'Outros'
-        
+        description: `Vai ser chamado quando alguém quiser editar um ou mais gastos, você irá editar pelo id do gasto para o usuário, se não houver alteração no valor mantenha o mesmo, você sempre tentará atribuir uma das categorias disponíveis para o gasto, caso não seja possível, você irá adicionar a categoria 'Outros'
+           
           exemplo de retorno:
    
             📌 *Gasto Editado com Sucesso*
