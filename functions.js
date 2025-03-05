@@ -212,8 +212,10 @@ async function editar(chatId, items) {
           
           console.log("item", item)
           const data = item;
-          console.log("data", data)
           
+          delete data.idGasto
+
+          console.log("data", data)
           //const categoriaId = encontrarCategoriaId(categoria);
 
 
@@ -222,7 +224,7 @@ async function editar(chatId, items) {
             where:{
               user_id_gasto_id: {
                 user_id: hashId,
-                gasto_id: data.idGasto,
+                gasto_id: item.idGasto,
               },
             },
           });
