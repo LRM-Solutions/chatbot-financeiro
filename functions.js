@@ -218,7 +218,7 @@ async function editar(chatId, items) {
           delete data.idGasto
 
           console.log("data", data)
-          
+
           //const categoriaId = encontrarCategoriaId(categoria);
 
           const editedItem = await prisma.gasto.update({
@@ -246,35 +246,39 @@ async function editar(chatId, items) {
   }
 }
 
-async function deletar(partes, chatId, client) {
+async function deletar(chatId, items) {
   const hashId = crypto.createHash("sha256").update(chatId).digest("hex");
-  if (partes.length < 2) {
-    client.sendMessage(chatId, "❌ Formato inválido! Use: !deletar idGasto");
-    return;
-  }
 
-  const idGasto = parseInt(partes[1]);
+  try{
+    let gastos = [];
 
-  if (isNaN(idGasto)) {
-    client.sendMessage(chatId, "❌ O ID do gasto deve ser um número!");
-    return;
-  }
+    await prisma.$transaction(async(prisma)=>{
+      gastos = await Promise.all(
+        items.map(async (item)=>{
 
-  try {
-    await prisma.gasto.delete({
-      where: {
-        user_id_gasto_id: {
-          user_id: hashId,
-          gasto_id: idGasto,
-        },
-      },
-    });
+          console.log('item:', item);
 
-    client.sendMessage(chatId, "✅ Gasto deletado com sucesso!");
-    return;
-  } catch (error) {
-    client.sendMessage(chatId, "❌ Erro ao deletar o valor!");
-    return;
+          const deletedItem = await prisma.gasto.delete({
+            where:{
+              user_id_gasto_id: {
+                user_id: hashId,
+                gasto_id: item.idGasto,
+              },
+            },
+          });
+
+          return deletedItem;
+          })
+        );
+      });
+
+      return gastos;
+  } catch(err){
+    console.log("Error: ", err);
+    return {
+      error: true,
+      errorMessage: "Ops, tente novamente em alguns segundos!",
+    };
   }
 }
 

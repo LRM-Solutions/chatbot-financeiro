@@ -2,7 +2,7 @@ const { openai } = require("@ai-sdk/openai");
 const { generateText, tool } = require("ai");
 const { param } = require("../routes");
 const { z } = require("zod");
-const { adicionarGastos, getTotal, editar } = require("../functions.js");
+const { adicionarGastos, getTotal, editar, deletar } = require("../functions.js");
 const { encontrarCategoriaId } = require("../Ids.js");
 const crypto = require("crypto");
 
@@ -139,7 +139,7 @@ const callAI = async ({ message, chatId, client }) => {
               descricao: z.string().optional().describe("Descrição do Gasto!"),
               valor: z.number().optional().describe("Valor do gasto"),
               categoria: z.string().optional().describe(
-                `Categoria do gasto - Sempre que o usuário colocar uma descrição nova você vai categorizar ela. As categorias disponiveis são: Alimentação, Transporte, Lazer, Saúde, Compras, Educação, Moradia, Outros`
+                `Categoria do gasto - Sempre que o usuário colocar uma descrição nova você vai categorizar ela. As categorias disponiveis são: Alimentação, Transporte, Lazer, Saúde, Compras, Educação, Moradia, Outros SEMPRE QUE HOUVER DESCRIÇÃO ALTERE A CATEGORIA!`
               ),
               idGasto: z.number().describe("Número que identifica o gasto a ser alterado!"),
             })
@@ -164,7 +164,31 @@ const callAI = async ({ message, chatId, client }) => {
           return res;
         },
       }),
-      
+      deletarGasto: tool({
+        parameters: z.object({
+          items: z.array(
+            z.object({
+              idGasto: z.number().describe("Número que identifica o gasto a ser deletado!"),
+            })
+          ),
+        }),
+        description: `Vai ser chamado quando alguém quiser deletar um ou mais gastos, você irá deletar pelo id do gasto para o usuário
+           
+          exemplo de retorno:
+   
+            📌 *Gasto (id_do_gasto) Deletado com Sucesso*
+            💵 *Valor:* R$ valor do gasto
+            📂 *Categoria: categoria do gasto*
+            📝 *Descrição: descricao do gasto* 
+
+          `,
+        execute: async ({ items }) => {
+          console.log(JSON.stringify(items));
+
+          const res = await deletar(chatId, items);
+          return res;
+        },
+      }),
     },
     prompt: message,
     maxSteps: 5,
