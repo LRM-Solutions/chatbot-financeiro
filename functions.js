@@ -208,10 +208,12 @@ async function editar(chatId, items) {
     await prisma.$transaction(async(prisma)=>{
       gastos = await Promise.all(
         items.map(async (item)=>{
-          console.log(item);
 
+          
+          console.log("item", item)
           const data = item;
-
+          console.log("data", data)
+          
           //const categoriaId = encontrarCategoriaId(categoria);
 
 
