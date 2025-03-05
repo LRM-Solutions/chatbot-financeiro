@@ -213,19 +213,20 @@ async function editar(chatId, items) {
           console.log("item", item)
           const data = item;
           
+          const idGasto = data.idGasto
+
           delete data.idGasto
 
           console.log("data", data)
+          
           //const categoriaId = encontrarCategoriaId(categoria);
-
-          console.log("item idgasto:", item.idGasto);
 
           const editedItem = await prisma.gasto.update({
             data,
             where:{
               user_id_gasto_id: {
                 user_id: hashId,
-                gasto_id: item.idGasto,
+                gasto_id: idGasto,
               },
             },
           });
