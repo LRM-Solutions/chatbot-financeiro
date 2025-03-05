@@ -218,6 +218,7 @@ async function editar(chatId, items) {
           console.log("data", data)
           //const categoriaId = encontrarCategoriaId(categoria);
 
+          console.log("item idgasto:", item.idGasto);
 
           const editedItem = await prisma.gasto.update({
             data,
