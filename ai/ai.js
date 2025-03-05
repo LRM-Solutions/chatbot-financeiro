@@ -138,7 +138,7 @@ const callAI = async ({ message, chatId, client }) => {
             z.object({
               descricao: z.string().optional().describe("Descrição do Gasto!"),
               valor: z.number().optional().describe("Valor do gasto"),
-              categoria: z.string().optional().describe(
+              categoria: z.string().describe(
                 `Categoria do gasto - As categorias disponiveis são: Alimentação, Transporte, Lazer, Saúde, Compras, Educação, Moradia, Outros`
               ),
               idGasto: z.number().describe("Número que identifica o gasto a ser alterado!"),
