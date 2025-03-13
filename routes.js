@@ -17,4 +17,10 @@ routes.get(
   DataController.TotalGastosMesAtual
 );
 routes.get("/gastos-categoria/:chatId", DataController.GastosCategoria);
+
+routes.post("/checkout-webhook", (req, res) => {
+  console.log(req.body);
+  return res.status(200).json(req.body);
+});
+
 module.exports = routes;
