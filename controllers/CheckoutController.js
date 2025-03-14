@@ -64,13 +64,11 @@ class CheckoutController {
       });
     }
 
-    const pagamento = await prisma.pagamento.create({
+    await prisma.pagamento.create({
       data: {
         user_id: user.user_id,
       },
     });
-
-    return res.status(200).json({ message: "Compra aprovada", pagamento });
   }
   async assinaturaCancelada(req, res) {}
   async assinaturaAtrasada(req, res) {}

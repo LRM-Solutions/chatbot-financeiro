@@ -51,24 +51,17 @@ client.on("message", async (message) => {
       });
 
       if (!userExists) {
-        const contato = await client.getContactById(chatId);
-        const nome = contato.pushname || contato.name || "Nome Não disponível";
-
-        newUser = await prisma.user.create({
-          data: {
-            user_id: hashId,
-            name: nome,
-            user_plan_id: 1,
-          },
-        });
+        return client.sendMessage(
+          "Você não está cadastrado em nosso sistema, por favor se cadastre em: https://financeai.lrmsolutions.com.br/"
+        );
       }
+
+      const response = await callAI({ message: msg, chatId, client });
+      client.sendMessage(chatId, response);
     });
   } catch (error) {
     console.log(error);
   }
-
-  const response = await callAI({ message: msg, chatId, client });
-  client.sendMessage(chatId, response);
 });
 
 App.listen(3000, "0.0.0.0", () => {
