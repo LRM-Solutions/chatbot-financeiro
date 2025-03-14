@@ -59,19 +59,11 @@ class CheckoutController {
         data: {
           user_id: hashId,
           name: customer.name,
-          user_plan_id: plan_id,
+          //   user_plan_id: plan_id,
         },
       });
     }
 
-    /*
-model Pagamento {
-  pagamento_id Int @id @default(autoincrement())
-  user_id String
-  data DateTime @default(now())
-  user User @relation(fields: [user_id], references: [user_id])
-}
-    */
     const pagamento = await prisma.pagamento.create({
       data: {
         user_id: user.user_id,
