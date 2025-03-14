@@ -20,9 +20,11 @@ routes.get(
 routes.get("/gastos-categoria/:chatId", DataController.GastosCategoria);
 
 routes.post("/checkout-webhook", (req, res) => {
+  console.log(req.body);
+
   switch (req.body.event) {
     case "SALE_APPROVED":
-      return CheckoutController.compraAprovada(req.body);
+    // return CheckoutController.compraAprovada(req.body);
     // case "assinatura_cancelada":
     //   return CheckoutController.assinaturaCancelada(req, res);
     // case "assinatura_atrasada":
