@@ -1,5 +1,6 @@
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
+const crypto = require("crypto");
 
 //  Se for fzr gasto por mes tera 2 telas umas pros gastos gerais e outra tela pros gastos
 // mensais. com 2 rotas uma /mes outra /total
