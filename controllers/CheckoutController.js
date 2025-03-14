@@ -59,7 +59,7 @@ class CheckoutController {
         data: {
           user_id: hashId,
           name: customer.name,
-          //   user_plan_id: plan_id,
+          user_plan_id: plan_id,
         },
       });
     }
