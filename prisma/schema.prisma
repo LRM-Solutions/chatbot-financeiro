@@ -16,7 +16,9 @@ datasource db {
 model User{
   user_id String @id 
   name String
-  gastos Gasto[] // 1 pra muitos
+  user_plan_id Int
+  gastos Gasto[] 
+  Pagamento Pagamento[]
 }
 
 model Gasto{
@@ -29,6 +31,13 @@ model Gasto{
   user_id String // Chave estrangeira
   user User @relation(fields: [user_id], references: [user_id])
 
-  @@unique([user_id, gasto_id])  
+  @@unique([user_id, gasto_id])
   @@id([user_id, gasto_id])
+}
+
+model Pagamento {
+  pagamento_id Int @id
+  user_id String
+  data DateTime @default(now())
+  user User @relation(fields: [user_id], references: [user_id])
 }
