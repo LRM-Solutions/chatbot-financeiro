@@ -58,6 +58,7 @@ client.on("message", async (message) => {
           data: {
             user_id: hashId,
             name: nome,
+            user_plan_id: 1,
           },
         });
       }
