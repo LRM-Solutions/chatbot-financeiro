@@ -25,25 +25,60 @@ class CheckoutController {
      */
     console.log(req);
 
-    const { created_at, customer, payment } = req;
+    const { customer, payment, products } = req;
 
     let plan_id;
+    switch (products.offer_name) {
+      case "Plano Gratis":
+        plan_id = 1;
+        break;
+      case "Plano Premium":
+        plan_id = 2;
+        break;
+      case "Plano Premium +":
+        plan_id = 3;
+        break;
+    }
 
     const formatNumber = `+${customer.phone_number}@c.us`;
-    const user = await prisma.user.findUnique({
+
+    const hashId = crypto
+      .createHash("sha256")
+      .update(formatNumber)
+      .digest("hex");
+
+    let user = await prisma.user.findUnique({
       where: {
-        phone_number: formatNumber,
+        user_id: hashId,
       },
     });
 
     if (!user) {
-      const newUser = await prisma.user.create({
+      user = await prisma.user.create({
         data: {
+          user_id: hashId,
           name: customer.name,
           user_plan_id: plan_id,
         },
       });
     }
+
+    /*
+model Pagamento {
+  pagamento_id Int @id @default(autoincrement())
+  user_id String
+  data DateTime @default(now())
+  user User @relation(fields: [user_id], references: [user_id])
+}
+    */
+    const pagamento = await prisma.pagamento.create({
+      data: {
+        user_id: user.user_id,
+        data: payment.finished_at,
+      },
+    });
+
+    return res.status(200).json({ message: "Compra aprovada", pagamento });
   }
   async assinaturaCancelada(req, res) {}
   async assinaturaAtrasada(req, res) {}
