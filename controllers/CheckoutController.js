@@ -29,7 +29,7 @@ class CheckoutController {
     const { customer, payment, products } = req;
 
     let plan_id;
-    switch (products.offer_name) {
+    switch (products[0].offer_name) {
       case "Plano Gratis":
         plan_id = 1;
         break;
@@ -41,7 +41,7 @@ class CheckoutController {
         break;
     }
 
-    const formatNumber = `+${customer.phone_number}@c.us`;
+    const formatNumber = `${customer.phone_number}@c.us`;
 
     const hashId = crypto
       .createHash("sha256")
