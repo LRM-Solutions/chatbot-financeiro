@@ -24,8 +24,8 @@ routes.post("/checkout-webhook", (req, res) => {
 
   switch (req.body.event) {
     case "SALE_APPROVED":
-    // return CheckoutController.compraAprovada(req.body);
-    // case "assinatura_cancelada":
+      return CheckoutController.compraAprovada(req.body);
+    case "assinatura_cancelada":
     //   return CheckoutController.assinaturaCancelada(req, res);
     // case "assinatura_atrasada":
     //   return CheckoutController.assinaturaAtrasada(req, res);

@@ -23,6 +23,7 @@ class CheckoutController {
 0|main  |   },
 
      */
+    console.log(req);
 
     const { created_at, customer, payment } = req;
 
