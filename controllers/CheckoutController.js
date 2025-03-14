@@ -67,7 +67,6 @@ class CheckoutController {
     const pagamento = await prisma.pagamento.create({
       data: {
         user_id: user.user_id,
-        data: payment.finished_at,
       },
     });
 

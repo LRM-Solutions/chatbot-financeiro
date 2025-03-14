@@ -13,14 +13,13 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User{
-  user_id String @id 
-  name String
-  user_plan_id Int
-  gastos Gasto[] 
-  Pagamento Pagamento[]
+ model User {
+  user_id      String    @id
+  name         String
+  user_plan_id Int?
+  gastos       Gasto[]
+  Pagamento    Pagamento[]
 }
-
 model Gasto{
   gasto_id Int 
   valor Float 
