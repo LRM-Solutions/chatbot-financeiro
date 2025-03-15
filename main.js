@@ -60,7 +60,9 @@ client.on("message", async (message) => {
       client.sendMessage(chatId, response);
     });
   } catch (error) {
-    console.log(error);
+    client.sendMessage(
+      "Você não está cadastrado em nosso sistema, por favor se cadastre em: https://financeai.lrmsolutions.com.br/"
+    );
   }
 });
 
