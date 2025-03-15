@@ -42,10 +42,15 @@ client.on("message", async (message) => {
   const hashId = crypto.createHash("sha256").update(chatId).digest("hex");
   const msg = message.body.trim();
 
+  console.log(chatId);
+  console.log(hashId);
+
   try {
     const userExists = await prisma.user.findUnique({
       where: { user_id: hashId },
     });
+
+    console.log(userExists.user_id);
 
     if (!userExists) {
       const registerLink = "https://financeai.lrmsolutions.com.br/"; // Substitua pelo link real de cadastro
