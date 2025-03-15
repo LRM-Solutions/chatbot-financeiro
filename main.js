@@ -53,6 +53,7 @@ client.on("message", async (message) => {
 
   if (!userExists) {
     client.sendMessage(
+      chatId,
       "Você não está cadastrado em nosso sistema, por favor, se cadastre pelo link: https://financeai.lrmsolutions.com.br/"
     );
     return;
