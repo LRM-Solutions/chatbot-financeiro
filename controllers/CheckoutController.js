@@ -26,7 +26,7 @@ class CheckoutController {
      */
     console.log(req);
 
-    const { customer, payment, products } = req;
+    const { customer, products } = req;
 
     let plan_id;
     switch (products[0].offer_name) {
@@ -42,14 +42,14 @@ class CheckoutController {
     }
 
     const formatNumber = `${
-      phone_number.split("").slice(0, 4).join("") +
-      phone_number.split("").slice(5).join("")
+      customer.phone_number.split("").slice(0, 4).join("") +
+      customer.phone_number.split("").slice(5).join("")
     }@c.us`;
 
     console.log(
       "phone number",
-      phone_number.split("").slice(0, 4).join("") +
-        phone_number.split("").slice(5).join("")
+      customer.phone_number.split("").slice(0, 4).join("") +
+        customer.phone_number.split("").slice(5).join("")
     );
 
     console.log(formatNumber);
