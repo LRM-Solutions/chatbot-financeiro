@@ -41,16 +41,16 @@ class CheckoutController {
         break;
     }
 
-    const formatNumber = `${
-      customer.phone_number.split("").slice(0, 4).join("") +
-      customer.phone_number.split("").slice(5).join("")
-    }@c.us`;
+    let formatNumber;
 
-    console.log(
-      "phone number",
-      customer.phone_number.split("").slice(0, 4).join("") +
+    if (customer.phone_number.length === 13) {
+      formatNumber = `${
+        customer.phone_number.split("").slice(0, 4).join("") +
         customer.phone_number.split("").slice(5).join("")
-    );
+      }@c.us`;
+    } else {
+      formatNumber = `${customer.phone_number}@c.us`;
+    }
 
     console.log(formatNumber);
 
