@@ -45,7 +45,11 @@ class CheckoutController {
       /^(\d{2})9/,
       "$1"
     )}@c.us`;
-    console.log("phone number", customer.phone_number);
+
+    console.log(
+      "phone number",
+      customer.phone_number.replace(/^(\d{2})9/, "$1")
+    );
 
     console.log(formatNumber);
 
