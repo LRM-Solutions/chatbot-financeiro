@@ -41,7 +41,10 @@ class CheckoutController {
         break;
     }
 
-    const formatNumber = `${customer.phone_number}@c.us`;
+    const formatNumber = `${customer.phone_number.replace(
+      /^(\d{2})9/,
+      "$1"
+    )}@c.us`;
     console.log("phone number", customer.phone_number);
 
     console.log(formatNumber);
