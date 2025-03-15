@@ -42,26 +42,22 @@ client.on("message", async (message) => {
   const hashId = crypto.createHash("sha256").update(chatId).digest("hex");
   const msg = message.body.trim();
 
-  console.log(chatId);
-  console.log(hashId);
+  console.log("chatId", chatId);
+  console.log("hashId", hashId);
 
-  try {
-    const userExists = await prisma.user.findUnique({
-      where: { user_id: hashId },
-    });
+  const userExists = await prisma.user.findUnique({
+    where: {
+      user_id: hashId,
+    },
+  });
 
-    console.log(userExists.user_id);
-
-    if (!userExists) {
-      const registerLink = "https://financeai.lrmsolutions.com.br/"; // Substitua pelo link real de cadastro
-      const warningMessage = `Olá! Parece que você ainda não está cadastrado. Para acessar nossos serviços, por favor, registre-se aqui: ${registerLink}`;
-      await client.sendMessage(chatId, warningMessage);
-      return; // Impede o processamento da mensagem pelo bot
-    }
-  } catch (error) {
-    console.log("Erro ao verificar usuário:", error);
+  if (!userExists) {
+    client.sendMessage(
+      "Você não está cadastrado em nosso sistema, por favor, se cadastre pelo link: https://financeai.lrmsolutions.com.br/"
+    );
     return;
   }
+  console.log("id do usuario verificado", userExists.user_id);
 
   const response = await callAI({ message: msg, chatId, client });
   client.sendMessage(chatId, response);
