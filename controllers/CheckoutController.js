@@ -41,14 +41,15 @@ class CheckoutController {
         break;
     }
 
-    const formatNumber = `${customer.phone_number
-      .split("")
-      .splice(4, 1)
-      .join("")}@c.us`;
+    const formatNumber = `${
+      phone_number.split("").slice(0, 4).join("") +
+      phone_number.split("").slice(5).join("")
+    }@c.us`;
 
     console.log(
       "phone number",
-      customer.phone_number.split("").splice(4, 1).join("")
+      phone_number.split("").slice(0, 4).join("") +
+        phone_number.split("").slice(5).join("")
     );
 
     console.log(formatNumber);
