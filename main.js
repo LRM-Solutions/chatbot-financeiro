@@ -43,27 +43,23 @@ client.on("message", async (message) => {
   const msg = message.body.trim();
 
   try {
-    await prisma.$transaction(async (prisma) => {
-      const userExists = await prisma.user.findUnique({
-        where: {
-          user_id: hashId,
-        },
-      });
-
-      if (!userExists) {
-        return client.sendMessage(
-          "Você não está cadastrado em nosso sistema, por favor se cadastre em: https://financeai.lrmsolutions.com.br/"
-        );
-      }
-
-      const response = await callAI({ message: msg, chatId, client });
-      client.sendMessage(chatId, response);
+    const userExists = await prisma.user.findUnique({
+      where: { user_id: hashId },
     });
+
+    if (!userExists) {
+      const registerLink = "https://financeai.lrmsolutions.com.br/"; // Substitua pelo link real de cadastro
+      const warningMessage = `Olá! Parece que você ainda não está cadastrado. Para acessar nossos serviços, por favor, registre-se aqui: ${registerLink}`;
+      await client.sendMessage(chatId, warningMessage);
+      return; // Impede o processamento da mensagem pelo bot
+    }
   } catch (error) {
-    client.sendMessage(
-      "Você não está cadastrado em nosso sistema, por favor se cadastre em: https://financeai.lrmsolutions.com.br/"
-    );
+    console.log("Erro ao verificar usuário:", error);
+    return;
   }
+
+  const response = await callAI({ message: msg, chatId, client });
+  client.sendMessage(chatId, response);
 });
 
 App.listen(3000, "0.0.0.0", () => {
